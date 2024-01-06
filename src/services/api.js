@@ -1,13 +1,20 @@
 import axios from 'axios';
 
-const mainUrl = 'https://pixabay.com/api/';
+axios.defaults.baseURL = 'https://pixabay.com/api/';
 const apiKey = '40632330-75f4a7e3fdd59698a6ace0990';
-const searchQuery = 'yellow flowers';
 const imageType = 'photos';
+const perPage = 12;
 
-export const requestImg = async () => {
+export const requestImg = async searchQuery => {
   const { data } = await axios.get(
-    `${mainUrl}?key=${apiKey}&q=${searchQuery}&image_type=${imageType}&per_page=12`
+    `?key=${apiKey}&q=${searchQuery}&image_type=${imageType}&per_page=${perPage}`
+  );
+  return data;
+};
+
+export const requestNextPage = async (searchQuery, page) => {
+  const { data } = await axios.get(
+    `?key=${apiKey}&q=${searchQuery}&image_type=${imageType}&per_page=${perPage}&page=${page}`
   );
   return data;
 };
