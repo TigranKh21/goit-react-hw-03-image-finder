@@ -90,7 +90,7 @@ export class App extends Component {
         {this.state.status === 'pending' && <ThreeCircles />}
         <SearchBar handleSearchQuery={this.handleSearchQuery} />
         <ImageGallery
-          state={this.state}
+          images={this.state.images}
           handleImageClick={this.handleImageClick}
         />
         {this.state.showModal && (
