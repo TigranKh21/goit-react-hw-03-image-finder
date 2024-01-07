@@ -3,7 +3,7 @@ import { ImageGallery } from 'components/ImageGallery/ImageGallery';
 import { Modal } from 'components/Modal/Modal';
 import { SearchBar } from 'components/SearchBar/SearchBar';
 import { Component } from 'react';
-import { requestImg, requestNextPage } from 'services/api';
+import { requestImg } from 'services/api';
 import { ThreeCircles } from 'react-loader-spinner';
 import css from './index.css';
 
@@ -16,46 +16,22 @@ export class App extends Component {
     modalImg: null,
     query: '',
     page: 1,
-    pages: '',
+    totalPages: 1,
   };
 
-  componentDidMount() {
-    this.setState({ status: 'pending' });
-    this.fetchImg();
-  }
-
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
-      this.setState({ page: 1 });
+    if (
+      prevState.query !== this.state.query ||
+      prevState.page !== this.state.page
+    ) {
       this.fetchImg();
     }
   }
 
   fetchImg = async () => {
     try {
-      const images = await requestImg(this.state.query);
-      const pages = Math.ceil(images.total / 12);
-      const filteredData = images.hits.map(
-        ({ id, webformatURL, largeImageURL, tags }) => ({
-          id,
-          webformatURL,
-          largeImageURL,
-          tags,
-        })
-      );
-      this.setState({
-        images: filteredData,
-        status: 'success',
-        pages: pages,
-      });
-    } catch (error) {
-      this.setState({ error: error.message, status: 'error' });
-    }
-  };
-
-  fetchLoadMore = async () => {
-    try {
-      const images = await requestNextPage(this.state.query, this.state.page);
+      const images = await requestImg(this.state.query, this.state.page);
+      const totalPages = Math.ceil(images.total / 12);
       const filteredData = images.hits.map(
         ({ id, webformatURL, largeImageURL, tags }) => ({
           id,
@@ -65,8 +41,11 @@ export class App extends Component {
         })
       );
       this.setState(prevState => ({
-        images: [...prevState.images, ...filteredData],
+        images: Array.isArray(prevState.images)
+          ? [...prevState.images, ...filteredData]
+          : filteredData,
         status: 'success',
+        totalPages: totalPages,
       }));
     } catch (error) {
       this.setState({ error: error.message, status: 'error' });
@@ -80,27 +59,29 @@ export class App extends Component {
     }));
   };
 
-  handleImageClick = id => {
-    const largeImg = this.state.images.filter(image => image.id === id)[0]
-      .largeImageURL;
+  handleImageClick = largeImageURL => {
+    const largeImg = this.state.images.filter(
+      image => image.largeImageURL === largeImageURL
+    )[0].largeImageURL;
     this.setState({ showModal: true, modalImg: largeImg });
   };
 
   handleSearchQuery = searchValue => {
-    this.setState({ query: searchValue });
+    this.setState({
+      images: null,
+      query: searchValue,
+      page: 1,
+    });
   };
 
   handleLoadMore = () => {
-    this.setState(
-      prevState => ({ page: prevState.page + 1 }),
-      () => {
-        this.fetchLoadMore();
-      }
-    );
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   checkLastPage = () => {
-    return this.state.page === this.state.pages;
+    return (
+      this.state.page === this.state.totalPages || this.state.images === null
+    );
   };
 
   render() {
@@ -115,7 +96,7 @@ export class App extends Component {
         {this.state.showModal && (
           <Modal onClose={this.onCloseModal} largeImg={this.state.modalImg} />
         )}
-        {this.state.images && (
+        {this.state.images && this.state.images.length > 0 && (
           <Button
             checkLastPage={this.checkLastPage()}
             onClick={this.handleLoadMore}

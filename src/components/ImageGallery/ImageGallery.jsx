@@ -10,7 +10,7 @@ export const ImageGallery = ({ state, handleImageClick }) => {
             <ImageGalleryItem
               key={image.id}
               state={image}
-              handleImageClick={() => handleImageClick(image.id)}
+              handleImageClick={() => handleImageClick(image.largeImageURL)}
             />
           ))}
       </ul>

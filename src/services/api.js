@@ -5,14 +5,7 @@ const apiKey = '40632330-75f4a7e3fdd59698a6ace0990';
 const imageType = 'photos';
 const perPage = 12;
 
-export const requestImg = async searchQuery => {
-  const { data } = await axios.get(
-    `?key=${apiKey}&q=${searchQuery}&image_type=${imageType}&per_page=${perPage}`
-  );
-  return data;
-};
-
-export const requestNextPage = async (searchQuery, page) => {
+export const requestImg = async (searchQuery, page) => {
   const { data } = await axios.get(
     `?key=${apiKey}&q=${searchQuery}&image_type=${imageType}&per_page=${perPage}&page=${page}`
   );

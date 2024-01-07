@@ -5,7 +5,7 @@ export const ImageGalleryItem = ({ state, handleImageClick }) => {
     <li
       key={state.id}
       className={css.ImageGalleryItem}
-      onClick={() => handleImageClick(state.id)}
+      onClick={() => handleImageClick(state.largeImageURL)}
     >
       <img
         src={state.webformatURL}
